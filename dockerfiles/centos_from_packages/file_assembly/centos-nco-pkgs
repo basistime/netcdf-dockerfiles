@@ -1,0 +1,4 @@
+RUN yum install -y nco
+
+#Select your preferred shell.
+#RUN yum install -y bash

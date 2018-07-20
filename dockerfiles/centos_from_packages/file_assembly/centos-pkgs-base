@@ -1,0 +1,11 @@
+FROM centos:latest
+
+#Include documentation for installed packages
+RUN sed -i 's:tsflags=nodocs::g' /etc/yum.conf
+RUN yum install -y man \
+                   man-pages
+
+RUN yum install -y epel-release
+
+RUN yum install -y netcdf
+
