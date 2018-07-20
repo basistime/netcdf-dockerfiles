@@ -1,6 +1,6 @@
 ## Component Files ##
 
-To enforce consistency of common build steps between files,
+To enforce consistency of common build steps across files,
 the actual Dockerfiles are assembled from component parts.
 
 Every Dockerfile in the centos\_from\_packages directory is
