@@ -28,7 +28,7 @@ RUN yum install -y make
 RUN yum install -y gcc
 RUN yum install -y gcc-c++
 
-#Get and Build zlib
+#Build zlib
 WORKDIR zlib-${ZVER}
 RUN ./configure --prefix=$ZOUT
 RUN make check install
