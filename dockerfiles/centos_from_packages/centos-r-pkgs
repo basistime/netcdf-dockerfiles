@@ -7,15 +7,16 @@ RUN yum install -y man \
 
 RUN yum install -y epel-release
 
-RUN yum install -y netcdf \
-                   netcdf-devel
+RUN yum install -y netcdf
+
+RUN yum install -y netcdf-devel
 
 RUN yum install -y R
 
 #Get the ncdf4 package from CRAN and set it up to load automatically
 RUN mkdir -p /usr/local/lib/R/site-library
 RUN R -e 'install.packages("ncdf4", repos="http://cran.us.r-project.org", lib="/usr/local/lib/R/site-library/")'
-RUN "library(ncdf4)" > .Rprofile
+RUN echo "library(ncdf4)" > .Rprofile
 
 #Select your preferred shell.
 #RUN yum install -y bash
