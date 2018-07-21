@@ -1,0 +1,6 @@
+#Assemble the final image
+FROM centos:latest AS final
+
+COPY --from=build_stage /usr/local/bin /usr/local/bin
+COPY --from=build_stage /usr/local/lib /usr/local/lib
+COPY --from=build_stage /usr/local/include /usr/local/include
