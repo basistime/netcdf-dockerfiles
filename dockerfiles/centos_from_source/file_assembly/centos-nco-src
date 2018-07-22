@@ -1,0 +1,39 @@
+ARG NCOVER=4.7.5
+ARG NCOOUT=/usr/local
+
+#Get NCO pre-requisites
+#(As listed at nco.sourceforge.net/#Source)
+RUN yum install -y epel-release
+RUN yum install -y antlr antlr-C++
+RUN yum install -y expat expat-devel
+RUN yum install -y bison cmake flex
+RUN yum install -y ncl
+RUN yum install -y gsl gsl-devel
+RUN yum install -y zlib-devel
+RUN yum install -y librx librx-devel
+RUN yum install -y udunits2 udunits2-devel
+#RUN yum install -y curl-devel libxml2-devel
+#RUN yum install -y libdap libdap-devel
+
+#Get NCO
+#TODO: Guess I have to get git, because that link redirects,
+#as does the one on github itself.
+RUN curl -O -L https://github.com/nco/nco/archive/${NCOVER}.tar.gz
+RUN tar -xzf ${NCOVER}.tar.gz
+
+#Build NCO
+WORKDIR nco-${NCOVER}
+RUN ./configure --prefix=${NCOOUT}
+RUN make install
+WORKDIR /
+
+#Assemble the final image
+FROM centos:latest AS final
+
+COPY --from=build_stage /lib /lib
+COPY --from=build_stage /lib64 /lib64
+COPY --from=build_stage /usr/lib64 /usr/lib64
+COPY --from=build_stage /usr/local/bin /usr/local/bin
+COPY --from=build_stage /usr/local/lib /usr/local/lib
+COPY --from=build_stage /usr/local/include /usr/local/include
+

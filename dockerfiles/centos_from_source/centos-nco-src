@@ -1,0 +1,91 @@
+FROM centos:latest AS build_stage
+
+#Specify version numbers.
+ARG ZVER=1.2.11
+ARG HDFREL=1.10
+ARG HDFVER=1.10.2
+ARG NCDFVER=4.6.1
+
+#Specify output directories
+ARG ZOUT=/usr/local
+ARG HDFOUT=/usr/local
+ARG NCDFOUT=/usr/local
+
+#Get the zlib source
+RUN curl -O https://www.zlib.net/zlib-${ZVER}.tar.gz
+RUN tar -xzf zlib-${ZVER}.tar.gz
+
+#Get the HDF5 source
+RUN curl -O https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDFREL}/hdf5-${HDFVER}/src/hdf5-${HDFVER}.tar.gz
+RUN tar -xzf hdf5-${HDFVER}.tar.gz
+
+#Get the netCDF source
+RUN curl -O https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-${NCDFVER}.tar.gz
+RUN tar -xzf netcdf-${NCDFVER}.tar.gz
+
+#Install several packages on this stage for compilation
+RUN yum install -y make
+RUN yum install -y gcc
+RUN yum install -y gcc-c++
+
+#Build zlib
+WORKDIR zlib-${ZVER}
+RUN ./configure --prefix=$ZOUT
+RUN make check install
+WORKDIR /
+
+#Build HDF5
+RUN yum install -y file
+RUN yum install -y perl
+WORKDIR hdf5-${HDFVER}
+RUN ./configure --enable-build-mode=production --with-zlib=${ZOUT} --prefix=${HDFOUT}
+RUN make check install
+WORKDIR /
+
+#Build netCDF
+RUN yum install -y curl-devel
+RUN yum install -y m4
+WORKDIR netcdf-${NCDFVER}
+RUN CPPFLAGS=-I${HDFOUT}/include LDFLAGS="-L${HDFOUT}/lib" ./configure -disable-doxygen --prefix=${NCDFOUT}
+RUN make check install
+WORKDIR /
+
+ARG NCOVER=4.7.5
+ARG NCOOUT=/usr/local
+
+#Get NCO pre-requisites
+#(As listed at nco.sourceforge.net/#Source)
+RUN yum install -y epel-release
+RUN yum install -y antlr antlr-C++
+RUN yum install -y expat expat-devel
+RUN yum install -y bison cmake flex
+RUN yum install -y ncl
+RUN yum install -y gsl gsl-devel
+RUN yum install -y zlib-devel
+RUN yum install -y librx librx-devel
+RUN yum install -y udunits2 udunits2-devel
+#RUN yum install -y curl-devel libxml2-devel
+#RUN yum install -y libdap libdap-devel
+
+#Get NCO
+#TODO: Guess I have to get git, because that link redirects,
+#as does the one on github itself.
+RUN curl -O -L https://github.com/nco/nco/archive/${NCOVER}.tar.gz
+RUN tar -xzf ${NCOVER}.tar.gz
+
+#Build NCO
+WORKDIR nco-${NCOVER}
+RUN ./configure --prefix=${NCOOUT}
+RUN make install
+WORKDIR /
+
+#Assemble the final image
+FROM centos:latest AS final
+
+COPY --from=build_stage /lib /lib
+COPY --from=build_stage /lib64 /lib64
+COPY --from=build_stage /usr/lib64 /usr/lib64
+COPY --from=build_stage /usr/local/bin /usr/local/bin
+COPY --from=build_stage /usr/local/lib /usr/local/lib
+COPY --from=build_stage /usr/local/include /usr/local/include
+
