@@ -68,8 +68,6 @@ RUN yum install -y udunits2 udunits2-devel
 #RUN yum install -y libdap libdap-devel
 
 #Get NCO
-#TODO: Guess I have to get git, because that link redirects,
-#as does the one on github itself.
 RUN curl -O -L https://github.com/nco/nco/archive/${NCOVER}.tar.gz
 RUN tar -xzf ${NCOVER}.tar.gz
 
