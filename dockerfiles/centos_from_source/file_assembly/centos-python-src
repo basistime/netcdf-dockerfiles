@@ -1,0 +1,24 @@
+#Assemble the python image
+FROM centos:latest AS final
+
+COPY --from=build_stage /usr/local/bin /usr/local/bin
+COPY --from=build_stage /usr/local/lib /usr/local/lib
+COPY --from=build_stage /usr/local/include /usr/local/include
+
+#Install python and other pre-reqs
+RUN yum install -y gcc
+
+RUN yum install -y epel-release
+
+RUN yum install -y python \
+                   python-devel \
+                   python-pip
+
+RUN pip install --upgrade pip
+
+RUN pip install --upgrade setuptools
+
+RUN pip install cftime
+
+RUN USE_SETUPCFG=0 HDF5_INCDIR=/usr/include/hdf5/serial HDF5_LIBDIR=/usr/lib/x86_64-linux-gnu/hdf5/serial pip install netcdf4
+
