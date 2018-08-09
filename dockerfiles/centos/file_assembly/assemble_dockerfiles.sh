@@ -2,9 +2,9 @@
 
 main()
 {
-    local BASE_FILE="centos-src-base"
+    local BASE_FILE="centos-base"
 
-    for FILE in *src
+    for FILE in centos*
     do
         if [ "${FILE}" != "${BASE_FILE}" ]
         then

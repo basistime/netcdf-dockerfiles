@@ -2,9 +2,9 @@
 
 main()
 {
-    local BASE_FILE="centos-pkgs-base"
+    local BASE_FILE="centos-base-simple"
 
-    for FILE in *pkgs
+    for FILE in centos*
     do
         if [ "${FILE}" != "${BASE_FILE}" ]
         then
